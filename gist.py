@@ -19,6 +19,7 @@ GITHUB_HEADERS = {
     'Accept': 'application/vnd.github.v3.raw+json'
 }
 
+
 def http_debug(response):
     '''
     Print the HTTP request/response debug log.
