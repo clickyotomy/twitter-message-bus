@@ -13,12 +13,11 @@ from datetime import datetime
 
 import requests
 
+# API URL, headers,
 GITHUB_API_URL = 'https://api.github.com'
 GITHUB_HEADERS = {
     'Accept': 'application/vnd.github.v3.raw+json'
 }
-GITHUB_ACCESS_TOKEN = json.loads(open('vault/keys.json', 'r').read())['github']
-
 
 def http_debug(response):
     '''
