@@ -13,7 +13,7 @@ from datetime import datetime
 
 import requests
 
-# API URL, headers,
+# API URL, headers.
 GITHUB_API_URL = 'https://api.github.com'
 GITHUB_HEADERS = {
     'Accept': 'application/vnd.github.v3.raw+json'
