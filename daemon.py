@@ -14,6 +14,7 @@ from logging import (NullHandler, getLogger, StreamHandler, Formatter, DEBUG,
 import tweepy
 from pydisque.client import Client
 
+# Formatting for logger output.
 getLogger(__name__).addHandler(NullHandler())
 LOGGER = getLogger()
 HANDLER = StreamHandler()
