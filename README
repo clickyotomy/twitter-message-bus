@@ -1,0 +1,187 @@
+twitter-message-bus
+-------------------
+
+Twitter as a message bus.
+
+INTRODUCTION
+    This is a proof of concept to show how Twitter can be used as a global
+    message bus.
+
+    Twitter has a streaming service where a program can listen to tweets posted
+    by a user; tweets based on a topic, location, etc. The same (more
+    specifically a user-stream) is used here.
+
+    A node posts a tweet on Twitter, through a registered account and all the
+    nodes that have subscribed to that account's user-stream can listen to the
+    messages. Since Twitter has a 140 character limit, we store the data on a
+    GitHub Gist and tweet the ID of the gist.
+
+    All the components in this program are loosely coupled, any customization
+    can be plugged-in easily.
+
+
+COMPONENTS
+    [-] Authentication: Verifying the sender as well as the integrity of
+        the transported messages is handeled by Keybase.
+    [-] Message Bus: Twitter habdled transporting messages back-and-forth.
+    [-] Data: Data is stored in an encrypted format (using Keybase) on GitHub.
+
+
+REQUIREMENTS
+    You will need a Linux machine which has redis and disque and python-2.7+
+    installed.
+    requirements.txt will install all the required Python libraries.
+
+
+ARCHITECTURE
+    [-] The disque job queue has two queues setup: 'in' and 'out'.
+        The 'in' queue receives all the incoming tweets from Twitter; the 'out'
+        queue contains tweet, gist ID's which will have a set expiry time.
+        These tweets/gists will be tracked from here and deleted accordingly,
+        once their TTL is expired.
+    [-] A daemon will listen to the Twitter Streaming API and dumps tweets to
+        the 'in' queue.
+    [-] A daemon will listen to the 'out' queue and perform deletion of expired
+        tweets and gists.
+    [-] A daemon will listen to the 'in' queue (like a worker); reads and
+        decrypts messages (using Keybase) by fetching data from gist(the tweet
+        contains the ID of the gist).
+    [-] A script will encrypt and sign the contents of the raw data.
+
+
+MODULES
+    This is a brief description of the Python modules in the source.
+    [-] auth:   Logic for encryption, description, signing and verifying data.
+    [-] gist:   CRUD operations on GitHub gists.
+    [-] daemon: Listen to the Twitter Stream; dump tweet to the 'in' queue.
+    [-] push:   Create a gist on GitHub (with the signed, encrypted) message,
+                post the gist ID as a tweet.
+    [-] pull:   Listen to the 'in' queue, fetch the contents of the gist (from
+                ID); decrypt and verify the content.
+    [-] expiry: Listen to the 'out' queue, keep a track of tweets/gists to be
+                deleted, delete them when the expiration time has reached.
+
+
+USAGE
+    push.py [-h] [-s HOST:PORT [HOST:PORT ...]] [-d] -r KEYBASE-ID [-t N]
+               (-i FILE | -m MESSAGE)
+
+    Push data to the message bus.
+
+    optional arguments:
+    -h, --help            show this help message and exit
+    -s HOST:PORT [HOST:PORT ...], --sockets HOST:PORT [HOST:PORT ...]
+                        a list containing the host, port numbers to listen to;
+                        defaults to localhost:7711 (for disque)
+    -d, --debug           enable debugging
+    -r KEYBASE-ID, --recipient KEYBASE-ID
+                        keybase-id to send
+    -t N, --ttl N         a TTL (in seconds) for the data on Twitter and
+                          GitHub;
+                        if not specified, the data will remain forever
+    -i FILE, --in-file FILE
+    -m MESSAGE, --message MESSAGE
+
+--------------------------------------------------------------------------------
+
+    pull.py [-h] [-s HOST:PORT [HOST:PORT ...]] [-d] [-r DELAY]
+
+    Read messages from the message bus.
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -s HOST:PORT [HOST:PORT ...], --sockets HOST:PORT [HOST:PORT ...]
+                            a list containing the host, port numbers to listen
+                            to; defaults to localhost:7711 (for disque)
+      -d, --debug           enable debugging
+      -r DELAY, --retry DELAY
+                            queue check frequncy (in seconds); defaults to 8
+
+
+--------------------------------------------------------------------------------
+
+    daemon.py [-h] [-s HOST:PORT [HOST:PORT ...]] -c CHANNEL [CHANNEL ...]
+                     [-d]
+
+    Listen to tweets; dump them to the queue.
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -s HOST:PORT [HOST:PORT ...], --sockets HOST:PORT [HOST:PORT ...]
+                            a list containing the host, port numbers to listen
+                            to; defaults to localhost:7711 (for disque)
+      -c CHANNEL [CHANNEL ...], --channels CHANNEL [CHANNEL ...]
+                            Twitter accounts to follow
+      -d, --debug           enable debugging
+
+
+--------------------------------------------------------------------------------
+
+    expire.py [-h] [-s HOST:PORT [HOST:PORT ...]] [-d] [-r DELAY]
+
+    Delete gists, tweets if a TTL is set.
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -s HOST:PORT [HOST:PORT ...], --sockets HOST:PORT [HOST:PORT ...]
+                            a list containing the host, port numbers to listen
+                            to; defaults to localhost:7711 (for disque)
+      -d, --debug           enable debugging
+      -r DELAY, --retry DELAY
+                            queue check frequncy (in seconds); defaults to 8
+
+
+--------------------------------------------------------------------------------
+
+
+SETUP:
+    redis:
+        http://redis.io/topics/quickstart
+
+    disque:
+        https://github.com/antirez/disque#setup
+
+    Keybase:
+        https://keybase.io/docs/command_line
+
+    Credentials:
+        Setup a Twitter account, create an application and generate
+        client-id, client-secret, access-toke, access-token-secret.
+        https://dev.twitter.com/oauth/overview/application-owner-access-tokens
+
+        Setup a GitHub account, generate a personal access token;
+        make sure 'gist' is in the list of scopes.
+        https://git.io/vmNUX
+
+        Store the API credentials in the source directory (after the clone)
+        under vault/keys.json, in this format.
+
+        {
+            "github": "github-personal-access-token",
+            "twitter": {
+                "consumer-key": "twitter-app-consumer-key",
+                "consumer-secret": "twitter-app-consumer-secret",
+                "access-token": "twitter-app-access-token"
+                "access-token-secret": "twitter-app-access-token-secret"
+            }
+        }
+
+    twitter-message-bus (basic setup; check options for customizations):
+        $ git clone https://github.com/clickyotomy/twitter-message-bus
+        $ pip install -r requirements.txt
+        $ ./daemon.py -c 'twitter-id'
+        $ ./expiry.py
+        $ ./pull.py
+        $ ./push.py -m 'Hello, World!' -r 'twitter-id'
+
+
+NOTES:
+    [-] daemon, expiry and pull run as daemons, you can pipe the output to a
+        log-file to monitor them.
+    [-] Keybase is still in alpha, so feel free to change the auth module.
+    [-] As of now, there is support only for text/* mimetypes.
+    [-] Since this is a proof of concept, the pull module does not do anything
+        other than display the received message.
+
+
+May the Force be with you.
