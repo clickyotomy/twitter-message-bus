@@ -53,7 +53,7 @@ MODULES
     This is a brief description of the Python modules in the source.
     [-] auth:   Logic for encryption, description, signing and verifying data.
     [-] gist:   CRUD operations on GitHub Gists.
-    [-] daemon: Listen to the Twitter Stream; dump tweet to the 'in' queue.
+    [-] stream: Listen to the Twitter Stream; dump tweet to the 'in' queue.
     [-] push:   Create a gist on GitHub (with the signed, encrypted) message,
                 post the gist ID as a tweet.
     [-] pull:   Listen to the 'in' queue, fetch the contents of the gist (from
@@ -100,7 +100,7 @@ USAGE
 
 --------------------------------------------------------------------------------
 
-    daemon.py [-h] [-s HOST:PORT [HOST:PORT ...]] -c CHANNEL [CHANNEL ...]
+    stream.py [-h] [-s HOST:PORT [HOST:PORT ...]] -c CHANNEL [CHANNEL ...]
                      [-d]
 
     Listen to tweets; dump them to the queue.
@@ -169,14 +169,14 @@ SETUP:
     twitter-message-bus (basic setup; check options for customizations):
         $ git clone https://github.com/clickyotomy/twitter-message-bus
         $ pip install -r requirements.txt
-        $ ./daemon.py -c 'twitter-id'
+        $ ./stream.py -c 'twitter-id'
         $ ./expiry.py
         $ ./pull.py
         $ ./push.py -m 'Hello, World!' -r 'twitter-id'
 
 
 NOTES:
-    [-] daemon, expiry and pull run as daemons, you can pipe the output to a
+    [-] stream, expiry and pull run as daemons, you can pipe the output to a
         log-file to monitor them.
     [-] Keybase is still in alpha, so feel free to change the auth module.
     [-] As of now, there is support only for text/* mimetypes.

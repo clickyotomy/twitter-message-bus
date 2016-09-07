@@ -32,7 +32,7 @@ FORMATTER = Formatter(
 HANDLER.setFormatter(FORMATTER)
 
 
-# Check daemon.py for more information.
+# Check stream.py for more information.
 VAULT_PATH = 'vault/keys.json'
 
 
