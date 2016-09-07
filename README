@@ -146,11 +146,11 @@ SETUP:
 
     Credentials:
         Setup a Twitter account, create an application and generate
-        client-id, client-secret, access-toke, access-token-secret.
+        client-id, client-secret, access-token, access-token-secret.
         https://dev.twitter.com/oauth/overview/application-owner-access-tokens
 
         Setup a GitHub account, generate a personal access token;
-        make sure 'gist' is in the list of scopes.
+        make sure 'gist' is in the list of selected scopes.
         https://git.io/vmNUX
 
         Store the API credentials in the source directory (after the clone)
@@ -166,7 +166,7 @@ SETUP:
             }
         }
 
-    twitter-message-bus (basic setup; check options for customizations):
+    twitter-message-bus (basic setup; check options for more functionality):
         $ git clone https://github.com/clickyotomy/twitter-message-bus
         $ pip install -r requirements.txt
         $ ./stream.py -c 'twitter-id'
@@ -182,6 +182,7 @@ NOTES:
     [-] As of now, there is support only for text/* mimetypes.
     [-] Since this is a proof of concept, the pull module does not do anything
         other than display the received message.
+    [-] The source code is documented to the point.
 
 
 May the Force be with you.
