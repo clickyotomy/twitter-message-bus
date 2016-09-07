@@ -4,6 +4,7 @@
 Handle deletion of tweets/gists based on their expiry.
 Listens to disque on the 'out' queue.
 Spawn any number of instances of this module to achieve parallel deletions.
+Servicing jobs is done in a round-robin manner.
 '''
 
 import time
@@ -65,7 +66,12 @@ def listen(queue, tokens, debug=False, retry=8):
             auth = None
             if len(job) > 0:
                 LOGGER.info('[processing] %s', repr(job[0]))
-                what, which, timestamp = job[0][2].split('~')
+                try:
+                    what, which, timestamp = job[0][2].split('~')
+                except IndexError:
+                    queue.ack_job(job[0][1])
+                    LOGGER.error('[queue] invalid message!')
+                    continue
                 future, now = (int(timestamp),
                                int(datetime.utcnow().strftime('%s')))
                 if future <= now:
@@ -79,7 +85,9 @@ def listen(queue, tokens, debug=False, retry=8):
                 else:
                     LOGGER.info('[push-back] ttl-diff-seconds: %d',
                                 (future - now))
-                    queue.nack_job(job[0][1])
+                    queue.ack_job(job[0][1])
+                    queue.del_job(job[0][1])
+                    queue.add_job('out', job[0][2])
             time.sleep(retry)
 
     except Exception as _error:
@@ -140,7 +148,11 @@ def main():
         LOGGER.addHandler(HANDLER)
 
     tokens = load_credentials()
-    print tokens
+
+    if None in tokens:
+        LOGGER.error('[load_credentials] unable to load credentials!')
+        return
+
     try:
         # Connect to the redis-queue.
         queue = Client(args['sockets'])

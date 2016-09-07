@@ -175,6 +175,10 @@ def main():
 
         # Load credentials, initialize authentication module, listen to tweets.
         api = load_credentials()
+        if not api:
+            LOGGER.error('[load_credentials] unable to load credentials!')
+            return
+
         listener = StreamDaemon(queue)
         streamer = tweepy.Stream(auth=api.auth, listener=listener)
         args['channels'] = [re.sub('@', '', _) for _ in args['channels']]

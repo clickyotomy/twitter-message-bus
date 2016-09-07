@@ -63,33 +63,33 @@ def send(plaintext, auth, recipient, ttl=0, queue=None, debug=False):
     '''
     Encrypt the contents to a keybase-saltpack; push it to Twitter, GitHub.
     '''
-    future = int(datetime.utcnow().strftime('%s')) + ttl + 5
+    future = int(datetime.utcnow().strftime('%s')) + ttl
     if status(debug):
         LOGGER.info('[keybase-status] client-up; signed-in')
 
         if lookup(recipient, debug):
             LOGGER.info('[keybase-lookup] %s exists', recipient)
-            signed = sign(plaintext, debug)
-            encrypted = encrypt(signed, recipient, debug)
-            gist_id = post(content=encrypted, username=recipient, debug=debug,
+            encrypted = encrypt(plaintext, recipient, debug)
+            signed = sign(encrypted, debug)
+            gist_id = post(content=signed, username=recipient, debug=debug,
                            token=auth[0])
             LOGGER.info('[gist-post] %s', gist_id)
-            # try:
-            if gist_id and ttl and queue and encrypted:
-                message = '~'.join(['gist', gist_id, str(future)])
-                queue.add_job('out', message)
-                LOGGER.info('[gist-queue] added %s to \'out\'', message)
+            try:
+                if gist_id and ttl and queue and encrypted:
+                    message = '~'.join(['gist', gist_id, str(future)])
+                    queue.add_job('out', message)
+                    LOGGER.info('[gist-queue] added %s to \'out\'', message)
 
-            tweet = auth[1].update_status(gist_id)
-            LOGGER.debug('[tweet] %s', tweet)
-            LOGGER.info('[tweet] %s', tweet.id)
+                tweet = auth[1].update_status(gist_id)
+                LOGGER.debug('[tweet] %s', tweet)
+                LOGGER.info('[tweet] %s', tweet.id)
 
-            if tweet and ttl and queue:
-                message = '~'.join(['tweet', tweet.id_str, str(future)])
-                queue.add_job('out', message)
-                LOGGER.info('[tweet-queue] added %s to \'out\'', message)
-        # except Exception:
-        #     LOGGER.error('[queue] unable to write to queue; data lost!')
+                if tweet and ttl and queue:
+                    message = '~'.join(['tweet', tweet.id_str, str(future)])
+                    queue.add_job('out', message)
+                    LOGGER.info('[tweet-queue] added %s to \'out\'', message)
+            except Exception:
+                LOGGER.error('[queue] unable to write to queue; data lost!')
 
         return gist_id, tweet.id
 
@@ -147,19 +147,23 @@ def main():
     else:
         plaintext = args['message']
 
-    # try:
-    if args['ttl']:
-        queue = Client(args['sockets'])
-        queue.connect()
-        queue_info = json.dumps(queue.info(), indent=4)
-        LOGGER.info('[queue-init]\n%s', queue_info)
+    try:
+        if args['ttl']:
+            queue = Client(args['sockets'])
+            queue.connect()
+            queue_info = json.dumps(queue.info(), indent=4)
+            LOGGER.info('[queue-init]\n%s', queue_info)
 
-    auth = load_credentials()
-    send(plaintext, auth, args['recipient'], args['ttl'], queue,
-         args['debug'])
+        auth = load_credentials()
+        if None in auth:
+            LOGGER.error('[load_credentials] unable to load credentials!')
+            return
 
-    # except Exception:
-    #     LOGGER.error('[error] unable to connect to the redis-queue (disque)!')
+        send(plaintext, auth, args['recipient'], args['ttl'], queue,
+             args['debug'])
+
+    except Exception:
+        LOGGER.error('[error] unable to connect to the redis-queue (disque)!')
 
 
 if __name__ == '__main__':
