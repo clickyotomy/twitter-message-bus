@@ -22,8 +22,8 @@ INTRODUCTION
 
 COMPONENTS
     [-] Authentication: Verifying the sender as well as the integrity of
-        the transported messages is handeled by Keybase.
-    [-] Message Bus: Twitter habdled transporting messages back-and-forth.
+        the transported messages is handled by Keybase.
+    [-] Message Bus: Twitter handles transporting messages back-and-forth.
     [-] Data: Data is stored in an encrypted format (using Keybase) on GitHub.
 
 
