@@ -28,7 +28,7 @@ COMPONENTS
 
 
 REQUIREMENTS
-    You will need a Linux machine which has redis and disque and python-2.7+
+    You will need a Linux machine which has redis, disque and python-2.7+
     installed.
     requirements.txt will install all the required Python libraries.
 
