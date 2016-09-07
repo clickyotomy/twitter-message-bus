@@ -28,7 +28,7 @@ HANDLER.setFormatter(FORMATTER)
 
 '''
 Credentials are stored here, change this path and the load_credentials()
-method to override defualts.
+method to override defaults.
 
 Notes:
     [*] Get a personal access token on Github: https://git.io/vmNUX;
