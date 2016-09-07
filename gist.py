@@ -79,7 +79,7 @@ def post(content, token=None, username=None, public=False, debug=False):
     payload = json.dumps({
         'files': {
             'message': {
-                'content': content
+                'content': content if content is not None else ''
             }
         },
         'public': public,

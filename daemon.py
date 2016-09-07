@@ -143,7 +143,7 @@ def main():
     This is the main method.
     '''
     message = 'Listen to tweets; dump them to the queue.'
-    socket_help = ('a list containing the hosts, port numbers to listen to; '
+    socket_help = ('a list containing the host, port numbers to listen to; '
                    'defaults to localhost:7711 (for disque)')
 
     parser = ArgumentParser(description=message)

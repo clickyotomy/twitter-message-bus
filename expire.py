@@ -77,7 +77,7 @@ def listen(queue, tokens, debug=False, retry=8):
                     queue.ack_job(job[0][1])
 
                 else:
-                    LOGGER.info('[push-back] ttl-diff-seconds: %d.',
+                    LOGGER.info('[push-back] ttl-diff-seconds: %d',
                                 (future - now))
                     queue.nack_job(job[0][1])
             time.sleep(retry)
@@ -117,7 +117,7 @@ def main():
     Initialize authentication, client connection.
     '''
     message = 'Delete gists, tweets if a TTL is set.'
-    socket_help = ('a list containing the hosts, port numbers to listen to; '
+    socket_help = ('a list containing the host, port numbers to listen to; '
                    'defaults to localhost:7711 (for disque)')
     retry_help = 'queue check frequncy (in seconds); defaults to 8'
 
@@ -125,7 +125,6 @@ def main():
     parser.add_argument('-s', '--sockets', help=socket_help,
                         default=['localhost:7711'], dest='sockets',
                         metavar=('HOST:PORT'), nargs='+')
-
     parser.add_argument('-d', '--debug', help='enable debugging',
                         action='store_true', default=False)
     parser.add_argument('-r', '--retry', help=retry_help, default=8,
