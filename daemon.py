@@ -2,7 +2,7 @@
 
 '''
 Manage the disque (redis queue) instance; listen to tweets using Twitter's
-Streaming API, dump them into the queue.
+Streaming API, dump them into the 'in' queue.
 '''
 
 import re
@@ -144,15 +144,15 @@ def main():
     '''
     message = 'Listen to tweets; dump them to the queue.'
     socket_help = ('a list containing the hosts, port numbers to listen to; '
-                   'defaults to localhost:7711')
+                   'defaults to localhost:7711 (for disque)')
 
     parser = ArgumentParser(description=message)
     parser.add_argument('-s', '--sockets', help=socket_help,
                         default=['localhost:7711'], dest='sockets',
-                        metavar=('HOST:POST'), nargs='+')
+                        metavar=('HOST:PORT'), nargs='+')
     parser.add_argument('-c', '--channels', help='Twitter accounts to follow',
-                        default=['localhost:7711'], dest='channels',
-                        metavar=('CHANNEL'), nargs='+', required=True)
+                        dest='channels', metavar=('CHANNEL'), nargs='+',
+                        required=True)
     parser.add_argument('-d', '--debug', help='enable debugging',
                         action='store_true', default=False)
 
