@@ -52,7 +52,7 @@ ARCHITECTURE
 MODULES
     This is a brief description of the Python modules in the source.
     [-] auth:   Logic for encryption, description, signing and verifying data.
-    [-] gist:   CRUD operations on GitHub gists.
+    [-] gist:   CRUD operations on GitHub Gists.
     [-] daemon: Listen to the Twitter Stream; dump tweet to the 'in' queue.
     [-] push:   Create a gist on GitHub (with the signed, encrypted) message,
                 post the gist ID as a tweet.
