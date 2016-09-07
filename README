@@ -172,7 +172,7 @@ SETUP:
         $ ./stream.py -c 'twitter-id'
         $ ./expiry.py
         $ ./pull.py
-        $ ./push.py -m 'Do. Or do not. There is no try' -r 'twitter-id'
+        $ ./push.py -m 'Do. Or do not. There is no try.' -r 'twitter-id'
 
 
 NOTES:
