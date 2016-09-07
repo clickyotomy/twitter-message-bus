@@ -1,7 +1,8 @@
 #! /usr/bin/env python2.7
 
 '''
-Wrapper around the Keybase client.
+Wrapper around the Keybase client; check the status of the client; lookup a
+user on Keybase; sign, verify, encrypt, decrypt text documents.
 '''
 
 import re
@@ -42,7 +43,7 @@ def status(debug=False):
                 if debug:
                     print '[stdout] status()'
                     print json.dumps(payload, indent=4, sort_keys=True)
-                return payload['LoggedIn']
+                return payload['LoggedIn'] and payload['Service']['Running']
             except (KeyError, ValueError):
                 if debug:
                     print 'Unable to parse response from the Keybase Client.'
