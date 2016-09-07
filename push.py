@@ -66,15 +66,19 @@ def send(plaintext, auth, recipient, ttl=0, queue=None, debug=False):
     future = int(datetime.utcnow().strftime('%s')) + ttl
     if status(debug):
         LOGGER.info('[keybase-status] client-up; signed-in')
-
+        # Do a look-up on Keybase for a valid recipient ID.
         if lookup(recipient, debug):
             LOGGER.info('[keybase-lookup] %s exists', recipient)
+            # Encrypt the document.
             encrypted = encrypt(plaintext, recipient, debug)
+            # Sign the document.
             signed = sign(encrypted, debug)
+            # Post the gist.
             gist_id = post(content=signed, username=recipient, debug=debug,
                            token=auth[0])
             LOGGER.info('[gist-post] %s', gist_id)
             try:
+                # Logic for gists/tweets with TTL.
                 if gist_id and ttl and queue and encrypted:
                     message = '~'.join(['gist', gist_id, str(future)])
                     queue.add_job('out', message)
@@ -88,13 +92,13 @@ def send(plaintext, auth, recipient, ttl=0, queue=None, debug=False):
                     message = '~'.join(['tweet', tweet.id_str, str(future)])
                     queue.add_job('out', message)
                     LOGGER.info('[tweet-queue] added %s to \'out\'', message)
+
+                return gist_id, tweet.id
             except Exception:
                 LOGGER.error('[queue] unable to write to queue; data lost!')
 
-        return gist_id, tweet.id
-
-        # else:
-        #     LOGGER.error('[keybase-lookup] lookup for %s failed!', recipient)
+        else:
+            LOGGER.error('[keybase-lookup] lookup for %s failed!', recipient)
 
     else:
         LOGGER.error('[keybase-status] client-down/signed-out!')
@@ -148,6 +152,7 @@ def main():
         plaintext = args['message']
 
     try:
+        # Instantiate a connection to the queue only if a TTL is specified.
         if args['ttl']:
             queue = Client(args['sockets'])
             queue.connect()

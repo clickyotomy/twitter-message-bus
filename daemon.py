@@ -45,7 +45,7 @@ By defualt, keys are stored this way (in JSON):
         "github": "github-personal-access-token",
         "twitter": {
             "consumer-key": "twitter-app-consumer-key",
-            "consumer-secret": "twitter-app-consuer-secret",
+            "consumer-secret": "twitter-app-consumer-secret",
             "access-token": "twitter-app-access-token"
             "access-token-secret": "twitter-app-access-token-secret"
         }
@@ -140,7 +140,7 @@ class StreamDaemon(tweepy.StreamListener):
 
 def main():
     '''
-    This is the main method.
+    This is the main method, validate args, load credentials, start the daemon.
     '''
     message = 'Listen to tweets; dump them to the queue.'
     socket_help = ('a list containing the host, port numbers to listen to; '

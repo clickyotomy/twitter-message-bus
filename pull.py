@@ -63,13 +63,16 @@ def receive(token, queue, retry, debug=False):
     try:
         while True:
             job = queue.get_job(['in'], count=1, nohang=False)
+            # Wait for a valid job.
             if len(job) > 0:
                 queue.ack_job(job[0][1])
                 LOGGER.info('[received-job]: %s', repr(job[0]))
                 signed = get(job[0][2].strip(), token, debug)
+                # Check for a valid signature.
                 if signed is None:
                     LOGGER.error('[gist-fetch] %s not found!', job[0][2])
                     continue
+                # If the message is verified, decrypt it.
                 flag, who, encrypted = verify(signed, debug)
                 if flag:
                     LOGGER.info('[keybase-verify] message signed by %s',
@@ -119,6 +122,7 @@ def main():
         LOGGER.setLevel(INFO)
         LOGGER.addHandler(HANDLER)
 
+    # Load credentials.
     token = load_credentials()
 
     if not token:

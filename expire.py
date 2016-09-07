@@ -64,6 +64,7 @@ def listen(queue, tokens, debug=False, retry=8):
         while True:
             job = queue.get_job(['out'], count=1, nohang=False)
             auth = None
+            # Wait for a message.
             if len(job) > 0:
                 LOGGER.info('[processing] %s', repr(job[0]))
                 try:
@@ -74,17 +75,22 @@ def listen(queue, tokens, debug=False, retry=8):
                     continue
                 future, now = (int(timestamp),
                                int(datetime.utcnow().strftime('%s')))
+
+                # Compare timestamps.
                 if future <= now:
                     if what == 'gist':
                         auth = tokens[0]
                     elif what == 'tweet':
                         auth = tokens[1]
+                    # Delete the tweet/gist.
                     remove(what, which, auth, debug)
                     queue.ack_job(job[0][1])
 
                 else:
                     LOGGER.info('[push-back] ttl-diff-seconds: %d',
                                 (future - now))
+                    # If the timestamp hasn't expired, push the job back to
+                    # queue.
                     queue.ack_job(job[0][1])
                     queue.del_job(job[0][1])
                     queue.add_job('out', job[0][2])
@@ -147,6 +153,7 @@ def main():
         LOGGER.setLevel(INFO)
         LOGGER.addHandler(HANDLER)
 
+    # Load the credentials.
     tokens = load_credentials()
 
     if None in tokens:
