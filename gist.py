@@ -1,7 +1,7 @@
 #! /usr/bin/env python2.7
 
 '''
-Create a gist containing the  keybase-saltpack; shorten the gist URL.
+Post, fetch or delete a gist (containing the keybase-saltpack) on GitHub.
 '''
 
 import os
