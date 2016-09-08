@@ -24,14 +24,12 @@ getLogger(__name__).addHandler(NullHandler())
 LOGGER = getLogger()
 HANDLER = StreamHandler()
 FORMATTER = Formatter(
-    ('%(asctime)s; log: %(name)s, %(levelname)s, %(levelno)s; '
-     'process: %(process)s - %(processName)s; path: %(pathname)s '
-     'L%(lineno)s - module: %(module)s, method: %(funcName)s; '
-     'error: %(exc_info)s; message: %(message)s')
+    ('%(asctime)s; %(name)s, %(levelname)s; PID: %(process)s; '
+     '%(module)s: %(funcName)s; traceback: %(exc_info)s; %(message)s')
 )
 HANDLER.setFormatter(FORMATTER)
 
-# Check daemon.py for more information.
+# Check stream.py for more information.
 VAULT_PATH = 'vault/keys.json'
 
 
@@ -75,7 +73,6 @@ def listen(queue, tokens, debug=False, retry=8):
                     continue
                 future, now = (int(timestamp),
                                int(datetime.utcnow().strftime('%s')))
-
                 # Compare timestamps.
                 if future <= now:
                     if what == 'gist':
@@ -166,7 +163,7 @@ def main():
         queue.connect()
         LOGGER.info('[start-daemon]')
         queue_info = json.dumps(queue.info(), indent=4)
-        LOGGER.info('[queue-init]\n%s', queue_info)
+        LOGGER.debug('[queue-init]\n%s', queue_info)
         listen(queue, tokens, args['debug'], args['retry'])
 
     except Exception:

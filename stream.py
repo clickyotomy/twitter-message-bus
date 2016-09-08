@@ -19,10 +19,8 @@ getLogger(__name__).addHandler(NullHandler())
 LOGGER = getLogger()
 HANDLER = StreamHandler()
 FORMATTER = Formatter(
-    ('%(asctime)s; log: %(name)s, %(levelname)s, %(levelno)s; '
-     'process: %(process)s - %(processName)s; path: %(pathname)s '
-     'L%(lineno)s - module: %(module)s, method: %(funcName)s; '
-     'error: %(exc_info)s; message: %(message)s')
+    ('%(asctime)s; %(name)s, %(levelname)s; PID: %(process)s; '
+     '%(module)s: %(funcName)s; traceback: %(exc_info)s; %(message)s')
 )
 HANDLER.setFormatter(FORMATTER)
 
@@ -171,7 +169,7 @@ def main():
         queue.connect()
         LOGGER.info('[start-daemon]')
         queue_info = json.dumps(queue.info(), indent=4)
-        LOGGER.info('[queue-init]\n%s', queue_info)
+        LOGGER.debug('[queue-init]\n%s', queue_info)
 
         # Load credentials, initialize authentication module, listen to tweets.
         api = load_credentials()

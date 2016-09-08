@@ -21,10 +21,8 @@ getLogger(__name__).addHandler(NullHandler())
 LOGGER = getLogger()
 HANDLER = StreamHandler()
 FORMATTER = Formatter(
-    ('%(asctime)s; log: %(name)s, %(levelname)s, %(levelno)s; '
-     'process: %(process)s - %(processName)s; path: %(pathname)s '
-     'L%(lineno)s - module: %(module)s, method: %(funcName)s; '
-     'error: %(exc_info)s; message: %(message)s')
+    ('%(asctime)s; %(name)s, %(levelname)s; PID: %(process)s; '
+     '%(module)s: %(funcName)s; traceback: %(exc_info)s; %(message)s')
 )
 HANDLER.setFormatter(FORMATTER)
 
@@ -63,6 +61,7 @@ def receive(token, queue, retry, debug=False):
     try:
         while True:
             job = queue.get_job(['in'], count=1, nohang=False)
+
             # Wait for a valid job.
             if len(job) > 0:
                 queue.ack_job(job[0][1])
@@ -74,10 +73,12 @@ def receive(token, queue, retry, debug=False):
                     continue
                 # If the message is verified, decrypt it.
                 flag, who, encrypted = verify(signed, debug)
+
                 if flag:
                     LOGGER.info('[keybase-verify] message signed by %s',
                                 who)
                     who, text = decrypt(encrypted, debug)
+
                     if who is not None:
                         LOGGER.info(('[keybase-decrypt] message encrypted'
                                      ' by %s'), who)
@@ -135,8 +136,9 @@ def main():
         queue.connect()
         LOGGER.info('[start-daemon]')
         queue_info = json.dumps(queue.info(), indent=4)
-        LOGGER.info('[queue-init]\n%s', queue_info)
-        receive(token, queue, args['retry'], args['debug'])
+        LOGGER.debug('[queue-init]\n%s', queue_info)
+        receive(token=token, queue=queue, retry=args['retry'],
+                debug=args['debug'])
 
     except Exception:
         LOGGER.error('[error] unable to connect to the redis-queue (disque)!')

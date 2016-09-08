@@ -24,10 +24,8 @@ getLogger(__name__).addHandler(NullHandler())
 LOGGER = getLogger()
 HANDLER = StreamHandler()
 FORMATTER = Formatter(
-    ('%(asctime)s; log: %(name)s, %(levelname)s, %(levelno)s; '
-     'process: %(process)s - %(processName)s; path: %(pathname)s '
-     'L%(lineno)s - module: %(module)s, method: %(funcName)s; '
-     'error: %(exc_info)s; message: %(message)s')
+    ('%(asctime)s; %(name)s, %(levelname)s; PID: %(process)s; '
+     '%(module)s: %(funcName)s; traceback: %(exc_info)s; %(message)s')
 )
 HANDLER.setFormatter(FORMATTER)
 
@@ -59,13 +57,17 @@ def load_credentials(path=VAULT_PATH):
     return gist, api
 
 
-def send(plaintext, auth, recipient, ttl=0, queue=None, debug=False):
+def send(plaintext, auth, recipient, ttl=0, **kwargs):
     '''
     Encrypt the contents to a keybase-saltpack; push it to Twitter, GitHub.
     '''
+    queue = kwargs['queue'] if 'queue' in kwargs else None
+    debug = kwargs['debug'] if 'debug' in kwargs else False
     future = int(datetime.utcnow().strftime('%s')) + ttl
+
     if status(debug):
         LOGGER.info('[keybase-status] client-up; signed-in')
+
         # Do a look-up on Keybase for a valid recipient ID.
         if lookup(recipient, debug):
             LOGGER.info('[keybase-lookup] %s exists', recipient)
@@ -76,7 +78,8 @@ def send(plaintext, auth, recipient, ttl=0, queue=None, debug=False):
             # Post the gist.
             gist_id = post(content=signed, username=recipient, debug=debug,
                            token=auth[0])
-            LOGGER.info('[gist-post] %s', gist_id)
+            LOGGER.info('[gist] %s', gist_id)
+
             try:
                 # Logic for gists/tweets with TTL.
                 if gist_id and ttl and queue and encrypted:
@@ -131,7 +134,6 @@ def main():
 
     args = vars(parser.parse_args())
 
-    print args
     if args['debug']:
         LOGGER.setLevel(DEBUG)
         LOGGER.addHandler(HANDLER)
@@ -157,15 +159,15 @@ def main():
             queue = Client(args['sockets'])
             queue.connect()
             queue_info = json.dumps(queue.info(), indent=4)
-            LOGGER.info('[queue-init]\n%s', queue_info)
+            LOGGER.debug('[queue-init]\n%s', queue_info)
 
         auth = load_credentials()
         if None in auth:
             LOGGER.error('[load_credentials] unable to load credentials!')
             return
 
-        send(plaintext, auth, args['recipient'], args['ttl'], queue,
-             args['debug'])
+        send(plaintext=plaintext, auth=auth, recipient=args['recipient'],
+             ttl=args['ttl'], queue=queue, debug=args['debug'])
 
     except Exception:
         LOGGER.error('[error] unable to connect to the redis-queue (disque)!')
