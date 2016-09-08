@@ -143,6 +143,7 @@ SETUP:
 
     Keybase:
         https://keybase.io/docs/command_line
+        Make sure you sign into Keybase and the client it up.
 
     Credentials:
         Setup a Twitter account, create an application and generate
@@ -168,11 +169,16 @@ SETUP:
 
     twitter-message-bus (basic setup; check options for more functionality):
         $ git clone https://github.com/clickyotomy/twitter-message-bus
+        $ $DISQUE_INSTALL_DIR/src/disque-server [OPTIONS]
+        $ cd $GIT_CLONE_DIR
         $ pip install -r requirements.txt
-        $ ./stream.py -c 'twitter-id'
+        $ ./stream.py -c 'twitter-handle'
         $ ./expiry.py
         $ ./pull.py
-        $ ./push.py -m 'Do. Or do not. There is no try.' -r 'twitter-id'
+        $ ./push.py -m 'Do. Or do not. There is no try.' -r 'twitter-handle'
+
+    # DISQUE_INSTALL_DIR: Path where disque was cloned and built.
+    # GIT_CLONE_DIR: Path where you cloned this repository.
 
 
 NOTES:
