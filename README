@@ -147,7 +147,7 @@ SETUP:
 
     Credentials:
         Setup a Twitter account, create an application and generate
-        client-id, client-secret, access-token, access-token-secret.
+        client-id, client-secret, access-token and access-token-secret.
         https://dev.twitter.com/oauth/overview/application-owner-access-tokens
 
         Setup a GitHub account, generate a personal access token;
