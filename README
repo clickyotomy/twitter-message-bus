@@ -77,8 +77,8 @@ USAGE
     -r KEYBASE-ID, --recipient KEYBASE-ID
                         keybase-id to send
     -t N, --ttl N         a TTL (in seconds) for the data on Twitter and
-                          GitHub;
-                        if not specified, the data will remain forever
+                          GitHub; if not specified, the data will remain
+                          as a gist, tweet
     -i FILE, --in-file FILE
     -m MESSAGE, --message MESSAGE
 
