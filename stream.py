@@ -180,27 +180,27 @@ def main():
         LOGGER.setLevel(INFO)
         LOGGER.addHandler(HANDLER)
 
-    try:
-        # Connect to the redis-queue.
-        queue = Client(args['sockets'])
-        queue.connect()
-        LOGGER.info('[start-daemon]')
-        queue_info = json.dumps(queue.info(), indent=4)
-        LOGGER.debug('[queue-init]\n%s', queue_info)
+    # try:
+    # Connect to the redis-queue.
+    queue = Client(args['sockets'])
+    queue.connect()
+    LOGGER.info('[start-daemon]')
+    queue_info = json.dumps(queue.info(), indent=4)
+    LOGGER.debug('[queue-init]\n%s', queue_info)
 
-        # Load credentials, initialize authentication module, listen to tweets.
-        api = load_credentials()
-        if not api:
-            LOGGER.error('[load_credentials] unable to load credentials!')
-            return
+    # Load credentials, initialize authentication module, listen to tweets.
+    api = load_credentials()
+    if not api:
+        LOGGER.error('[load_credentials] unable to load credentials!')
+        return
 
-        listener = StreamDaemon(queue)
-        streamer = tweepy.Stream(auth=api.auth, listener=listener)
-        args['channels'] = [re.sub('@', '', _) for _ in args['channels']]
-        streamer.userstream(track=args['channels'])
+    listener = StreamDaemon(queue)
+    streamer = tweepy.Stream(auth=api.auth, listener=listener)
+    args['channels'] = [re.sub('@', '', _) for _ in args['channels']]
+    streamer.userstream(track=args['channels'])
 
-    except Exception:
-        LOGGER.error('[error] unable to connect to the redis-queue (disque)!')
+    # except Exception:
+        # LOGGER.error('[error] unable to connect to the redis-queue (disque)!')
 
     except KeyboardInterrupt:
         LOGGER.critical('[stop-daemon]')
