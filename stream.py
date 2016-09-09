@@ -97,7 +97,17 @@ class StreamDaemon(tweepy.StreamListener):
         log = ('[tweet] id: {0}; timestamp: {1}; '
                'from: {2}; content: {3}').format(__id, __timestamp, __from,
                                                  __content)
-        LOGGER.info(log)
+
+        # Filter out SHA1, discard the rest.
+        pattern = re.compile(r'\b[0-9a-f]{5,40}\b')
+
+        if not (pattern.search(__content) and len(__content) == 40):
+            LOGGER.info('[tweet-discard] %s', __content)
+            return
+
+        LOGGER.info('[tweet] %s', log)
+        LOGGER.debug('[incoming-tweet] %s', status)
+
 
         # Push the message to the 'in' queue.
         try:
