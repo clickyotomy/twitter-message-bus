@@ -44,7 +44,7 @@ By defualt, keys are stored this way (in JSON):
         "twitter": {
             "consumer-key": "twitter-app-consumer-key",
             "consumer-secret": "twitter-app-consumer-secret",
-            "access-token": "twitter-app-access-token"
+            "access-token": "twitter-app-access-token",
             "access-token-secret": "twitter-app-access-token-secret"
         }
     }
