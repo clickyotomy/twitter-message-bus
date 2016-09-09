@@ -168,9 +168,10 @@ SETUP:
         }
 
     twitter-message-bus (basic setup; check options for more functionality):
-        $ git clone https://github.com/clickyotomy/twitter-message-bus
-        $ $DISQUE_INSTALL_DIR/src/disque-server [OPTIONS]
-        $ cd $GIT_CLONE_DIR
+        $ git clone https://github.com/clickyotomy/twitter-message-bus \
+          GIT_CLONE_DIR
+        $ DISQUE_INSTALL_DIR/src/disque-server [OPTIONS]
+        $ cd GIT_CLONE_DIR
         $ pip install -r requirements.txt
         $ ./stream.py -c 'twitter-handle'
         $ ./expiry.py
