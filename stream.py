@@ -84,6 +84,7 @@ class StreamDaemon(tweepy.StreamListener):
         '''
         super(StreamDaemon, self).__init__()
         self.queue = queue
+        self.prefix = 'twitter-message-bus'
 
     def on_status(self, status):
         '''
@@ -95,26 +96,32 @@ class StreamDaemon(tweepy.StreamListener):
         __timestamp = status.timestamp_ms
 
         log = ('[tweet] id: {0}; timestamp: {1}; '
-               'from: {2}; content: {3}').format(__id, __timestamp, __from,
-                                                 __content)
+               'from: {2}; content: {3}').format(__id, __timestamp,
+                                                 __from, __content)
 
         # Filter out SHA1, discard the rest.
         pattern = re.compile(r'\b[0-9a-f]{5,40}\b')
 
-        if not (pattern.search(__content) and len(__content) == 40):
+        if re.search(re.escape(self.prefix), __content):
+            __content = re.sub(re.escape(self.prefix), '', __content)
+            _random, _gist_id = __content.split(':')
+            if pattern.search(_random):
+                LOGGER.info('[tweet] %s', log)
+                LOGGER.debug('[incoming-tweet] %s', status)
+
+                # Push the message to the 'in' queue.
+                try:
+                    __job_id = self.queue.add_job('in', _gist_id)
+                    LOGGER.info('[queued] job-id: %s', __job_id)
+
+                except Exception:
+                    LOGGER.critical(('[queue-error]: Unable to add job; '
+                                     'message lost.'))
+        else:
             LOGGER.info('[tweet-discard] %s', __content)
-            return
 
-        LOGGER.info('[tweet] %s', log)
-        LOGGER.debug('[incoming-tweet] %s', status)
+        return
 
-
-        # Push the message to the 'in' queue.
-        try:
-            __job_id = self.queue.add_job('in', __content)
-            LOGGER.info('[queued] job-id: %s', __job_id)
-        except Exception:
-            LOGGER.critical('[queue-error]: Unable to add job; message lost.')
 
     def on_error(self, status):
         '''

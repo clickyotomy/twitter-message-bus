@@ -88,7 +88,7 @@ def post(content, token=None, username=None, public=False, debug=False):
 
     response = github(http='post', uri='gists', token=token, payload=payload,
                       debug=debug)
-    return response['id'] if 'id' in response.keys() else None
+    return (response['id'], random) if 'id' in response else (None, None)
 
 
 def get(gist_id, token=None, debug=False):
@@ -98,7 +98,7 @@ def get(gist_id, token=None, debug=False):
     response = github(http='get', uri='gists/{0}'.format(gist_id), token=token,
                       payload=None, debug=debug)
 
-    if 'files' in response.keys():
+    if 'files' in response:
         return response['files']['message']['content']
     return None
 

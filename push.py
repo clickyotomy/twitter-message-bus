@@ -64,6 +64,7 @@ def send(plaintext, auth, recipient, ttl=0, **kwargs):
     queue = kwargs['queue'] if 'queue' in kwargs else None
     debug = kwargs['debug'] if 'debug' in kwargs else False
     future = int(datetime.utcnow().strftime('%s')) + ttl
+    prefix = 'twitter-message-bus'
 
     if status(debug):
         LOGGER.info('[keybase-status] client-up; signed-in')
@@ -76,9 +77,11 @@ def send(plaintext, auth, recipient, ttl=0, **kwargs):
             # Sign the document.
             signed = sign(encrypted, debug)
             # Post the gist.
-            gist_id = post(content=signed, username=recipient, debug=debug,
-                           token=auth[0])
-            LOGGER.info('[gist] %s', gist_id)
+            gist_id, _hash = post(content=signed, username=recipient,
+                                  debug=debug, token=auth[0])
+            if gist_id:
+                prefix = '-'.join([prefix, _hash])
+                LOGGER.info('[gist] %s', gist_id)
 
             try:
                 # Logic for gists/tweets with TTL.
@@ -87,9 +90,11 @@ def send(plaintext, auth, recipient, ttl=0, **kwargs):
                     queue.add_job('out', message)
                     LOGGER.info('[gist-queue] added %s to \'out\'', message)
 
-                tweet = auth[1].update_status(gist_id)
-                LOGGER.debug('[tweet] %s', tweet)
-                LOGGER.info('[tweet] %s', tweet.id)
+                tweet = None
+                if gist_id:
+                    tweet = auth[1].update_status(':'.join([prefix, gist_id]))
+                    LOGGER.debug('[tweet] %s', tweet)
+                    LOGGER.info('[tweet] %s', tweet.id)
 
                 if tweet and ttl and queue:
                     message = '~'.join(['tweet', tweet.id_str, str(future)])
