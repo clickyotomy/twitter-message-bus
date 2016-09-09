@@ -155,7 +155,7 @@ SETUP:
         https://git.io/vmNUX
 
         Store the API credentials in the source directory (after the clone)
-        under vault/keys.json, in this format.
+        under vault/keys.json, in this format:
 
         {
             "github": "github-personal-access-token",
