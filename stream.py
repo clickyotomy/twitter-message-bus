@@ -205,8 +205,9 @@ def main():
         args['channels'] = [re.sub('@', '', _) for _ in args['channels']]
         streamer.userstream(track=args['channels'])
 
-    # except Exception:
-        # LOGGER.error('[error] unable to connect to the redis-queue (disque)!')
+    except Exception:
+        LOGGER.error('[error] unknown error')
+        LOGGER.error('[error] unable to connect to the redis-queue (disque)!')
 
     except KeyboardInterrupt:
         LOGGER.critical('[stop-daemon]')
