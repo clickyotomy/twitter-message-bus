@@ -6,6 +6,7 @@ Streaming API, dump them into the 'in' queue.
 '''
 
 import re
+import sys
 import json
 from argparse import ArgumentParser
 from logging import (NullHandler, getLogger, StreamHandler, Formatter, DEBUG,
@@ -23,6 +24,10 @@ FORMATTER = Formatter(
      '%(module)s: %(funcName)s; traceback: %(exc_info)s; %(message)s')
 )
 HANDLER.setFormatter(FORMATTER)
+
+# Take care of nasty non standard ASCII errors.
+# reload(sys)
+# sys.setdefaultencoding("utf-8")
 
 
 '''
@@ -92,7 +97,8 @@ class StreamDaemon(tweepy.StreamListener):
         '''
         __id = status.id
         __from = status.author.screen_name
-        __content = status.text.strip()
+        __text = status.text.strip()
+        __content = ''.join([i if ord(i) < 128 else ' ' for i in __text])
         __timestamp = status.timestamp_ms
 
         log = ('[tweet] id: {0}; timestamp: {1}; '
